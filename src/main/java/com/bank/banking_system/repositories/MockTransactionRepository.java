@@ -12,14 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Repository
+@Repository("mockTransactionRepository")
 public class MockTransactionRepository implements TransactionRepository {
-     List<Transaction> transactions = new ArrayList<>();
+    List<Transaction> transactions = new ArrayList<>();
 
+    @Override
     public List<Transaction> getTransactions() {
         return transactions;
     }
 
+    @Override
     public void setTransactions(List<Transaction> transactions) {
         if (transactions != null)
             this.transactions = transactions;
@@ -45,6 +47,7 @@ public class MockTransactionRepository implements TransactionRepository {
         return new Pair<>(filterFromInclusive, filterToExclusive);
     }
 
+    @Override
     public Stream<Transaction> getTransactionsByDate(LocalDate dateFromInclusive, LocalDate dateToInclusive) {
         final Pair<Instant, Instant> filterInterval = getValidInterval(dateFromInclusive, dateToInclusive);
 

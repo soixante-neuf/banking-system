@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("basicTransactionService")
 public class BasicTransactionService implements TransactionService {
     private static final String[] csvHeader = new String[] {
             "Account Number",
@@ -56,6 +56,7 @@ public class BasicTransactionService implements TransactionService {
         }
     }
 
+    @Override
     public List<Transaction> importTransactions(Reader importReader) throws IOException, CsvException {
         if (importReader == null)
             throw new IOException("Null reader for CSV import was passed.");
@@ -88,6 +89,7 @@ public class BasicTransactionService implements TransactionService {
         };
     }
 
+    @Override
     public void exportTransactions(Writer exportWriter, List<Transaction> transactions) {
         final CSVParserWriter writer = new CSVParserWriter(exportWriter, parser, "\n");
         final List<String[]> rows = transactions
@@ -100,6 +102,7 @@ public class BasicTransactionService implements TransactionService {
     }
 
 
+    @Override
     public String calculateBalance(String accountIban, List<Transaction> transactions) {
         boolean accountHasTransactions = false;
         double balance = 0.0D;
@@ -126,6 +129,6 @@ public class BasicTransactionService implements TransactionService {
 
         return accountHasTransactions
                 ? String.format("%.2f %s", balance, currentCurrency.toString())
-                : "Account does not have any transactions.";
+                : "No transactions were found.";
     }
 }

@@ -6,8 +6,11 @@ import com.bank.banking_system.repositories.TransactionRepository;
 import com.bank.banking_system.services.TransactionService;
 import com.opencsv.exceptions.CsvException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +28,9 @@ public class TransactionController {
     private final TransactionRepository transactionRepository;
     private final TransactionService transactionService;
 
-    public TransactionController(TransactionRepository transactionRepository, TransactionService transactionService) {
+    public TransactionController(
+            @Qualifier("mockTransactionRepository") TransactionRepository transactionRepository,
+            @Qualifier("basicTransactionService") TransactionService transactionService) {
         this.transactionRepository = transactionRepository;
         this.transactionService = transactionService;
     }
