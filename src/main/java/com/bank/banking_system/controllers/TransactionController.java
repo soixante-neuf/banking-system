@@ -1,5 +1,6 @@
 package com.bank.banking_system.controllers;
 
+import com.bank.banking_system.models.BalanceRequest;
 import com.bank.banking_system.models.Transaction;
 import com.bank.banking_system.repositories.TransactionRepository;
 import com.bank.banking_system.services.TransactionService;
@@ -16,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.LocalDate;
 import java.util.*;
+
 
 @RestController
 @RequestMapping("/transactions")
@@ -70,13 +72,16 @@ public class TransactionController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/balance")
+    @PostMapping(value = "/balance")
     public ResponseEntity<String> calculateAccountBalance(
-            @RequestParam(value = "account") String accountIban,
+            @RequestBody BalanceRequest requestBody,
             @RequestParam(value = "dateFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
             @RequestParam(value = "dateTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
     ) {
-        if (accountIban == null)
+        if (requestBody == null)
+            return ResponseEntity.badRequest().build();
+
+        if (requestBody.accountIban() == null)
             return ResponseEntity.badRequest()
                     .body("Account (IBAN) number was not specified");
 
@@ -85,6 +90,6 @@ public class TransactionController {
                 .toList();
 
         return ResponseEntity.ok()
-                .body(transactionService.calculateBalance(accountIban, relevantTransactions));
+                .body(transactionService.calculateBalance(requestBody.accountIban(), relevantTransactions));
     }
 }

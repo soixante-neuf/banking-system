@@ -1,8 +1,10 @@
 package com.bank.banking_system.repositories;
 
 import com.bank.banking_system.models.Transaction;
+import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Repository;
 
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -23,17 +25,33 @@ public class MockTransactionRepository implements TransactionRepository {
             this.transactions = transactions;
     }
 
-    public Stream<Transaction> getTransactionsByDate(LocalDate dateFromInclusive, LocalDate dateToInclusive) {
-        dateFromInclusive = dateFromInclusive != null ? dateFromInclusive : LocalDate.MIN;
-        dateToInclusive = dateToInclusive != null ? dateToInclusive : LocalDate.MAX;
+    private Pair<Instant, Instant> getValidInterval(LocalDate dateFromInclusive, LocalDate dateToInclusive) {
+        Instant filterFromInclusive = Instant.MIN;
+        Instant filterToExclusive = Instant.MAX;
 
-        final Instant filterFromInclusive = dateFromInclusive.atStartOfDay(ZoneOffset.systemDefault()).toInstant();
-        final Instant filterToExclusive = dateToInclusive.atStartOfDay(ZoneOffset.systemDefault()).plusDays(1L).toInstant();
+        try {
+            filterFromInclusive = dateFromInclusive
+                    .atStartOfDay(ZoneOffset.systemDefault())
+                    .toInstant();
+        } catch (NullPointerException | DateTimeException ignored) {}
+
+        try {
+            filterToExclusive = dateToInclusive
+                    .atStartOfDay(ZoneOffset.systemDefault())
+                    .plusDays(1L)
+                    .toInstant();
+        } catch (NullPointerException | DateTimeException ignored) {}
+
+        return new Pair<>(filterFromInclusive, filterToExclusive);
+    }
+
+    public Stream<Transaction> getTransactionsByDate(LocalDate dateFromInclusive, LocalDate dateToInclusive) {
+        final Pair<Instant, Instant> filterInterval = getValidInterval(dateFromInclusive, dateToInclusive);
 
         return getTransactions()
                 .stream()
                 .filter(transaction ->
-                        !transaction.time().toInstant().isBefore(filterFromInclusive)
-                                && transaction.time().toInstant().isBefore(filterToExclusive));
+                        !transaction.time().toInstant().isBefore(filterInterval.a)
+                                && transaction.time().toInstant().isBefore(filterInterval.b));
     }
 }
